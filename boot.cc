@@ -159,11 +159,15 @@ extern "C" uint32_t rom_loader_entry(void *rwRoot)
 	// isn't going to be 255 KiB either.
 	iram.bounds()             = 0x3fc00;
 	uint32_t end;
+	// Make messages from the loader red
+	puts(uart, "\033[31;1m");
 	// Try loading until we have successfully loaded some data and not see an
 	// error condition.
 	while ((end = load_firmware(uart, iram)) == 0) {}
 	// Return the end location.  The assembly code will zero the memory, which
 	// includes our stack.
 	puts(uart, "Loaded firmware, jumping to IRAM.");
+	// Reset the colour
+	puts(uart, "\033[0m");
 	return end;
 }
