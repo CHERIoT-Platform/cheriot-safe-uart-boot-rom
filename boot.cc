@@ -9,6 +9,11 @@ using namespace CHERI;
 namespace
 {
 	/**
+	 * The bit that indicates that the button is pressed.
+	 */
+	constexpr uint32_t ButtonBit = 0x10;
+
+	/**
 	 * Write a string to the UART.
 	 */
 	void puts(volatile Uart *uart, const char *msg, bool newline = true)
@@ -85,16 +90,26 @@ namespace
 	 * Load firmware from the specified UART, storing it via the capability in
 	 * iram.
 	 */
-	uint32_t load_firmware(volatile Uart *uart, uint32_t *iram)
+	uint32_t load_firmware(volatile Uart *uart, uint32_t *iram, volatile uint32_t *gpioRead)
 	{
 		auto read_byte = [&]() {
 			return hex_to_byte(uart->blocking_read(), uart->blocking_read());
 		};
 		uint32_t words = 0;
-		puts(uart, "Ready to load firmware");
+		puts(uart, "Ready to load firmware, hold BTN0 to ignore UART input.");
 		uint32_t word;
 		while (true)
 		{
+			if (*gpioRead & ButtonBit)
+			{
+				puts(uart, "Button pressed, ignoring UART input...");
+				while (*gpioRead & ButtonBit)
+				{
+					// Discard data from the UART.
+					(void)uart->data;
+				}
+				return 0;
+			}
 			char c = uart->blocking_read();
 			if (c == '\n')
 			{
@@ -158,12 +173,19 @@ extern "C" uint32_t rom_loader_entry(void *rwRoot)
 	// don't actually use anything like that much, but a typical firmware image
 	// isn't going to be 255 KiB either.
 	iram.bounds()             = 0x3fc00;
+
+	// Set up the bounds for the GPIO read channel that is connected to the
+	// buttons.
+	Capability<volatile uint32_t> gpioRead = root.cast<volatile uint32_t>();
+	gpioRead.address() = 0x8f00f000;
+	gpioRead.bounds() = sizeof(uint32_t);
+
 	uint32_t end;
 	// Make messages from the loader red
 	puts(uart, "\033[31;1m");
 	// Try loading until we have successfully loaded some data and not see an
 	// error condition.
-	while ((end = load_firmware(uart, iram)) == 0) {}
+	while ((end = load_firmware(uart, iram, gpioRead)) == 0) {}
 	// Return the end location.  The assembly code will zero the memory, which
 	// includes our stack.
 	puts(uart, "Loaded firmware, jumping to IRAM.");
