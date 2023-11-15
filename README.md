@@ -38,13 +38,17 @@ Then:
 If you do it correctly, you will see something like this in the UART output:
 
 ```
-Ready to load firmware
+Ready to load firmware, hold BTN0 to ignore UART input.                                
 Starting loading.  First word was: 40812A15
 ..............................................................................
 Finished loading.  Last word was: 020000B8
-Number of words loaded to IRAM: 00004DBA
+Number of words loaded to IRAM: 00004D92
 Loaded firmware, jumping to IRAM.
 ```
+
+If you start loading the wrong thing and get error messages, hold button 0 (in the corner on the same side as the reset button) as long as the UART RX LED remains lit.
+This will cause the loader to ignore everything until you release the button.
+You can then try loading again.
 
 The UART will then usually be reinitialised by the firmware that you've loaded.
 
