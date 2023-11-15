@@ -46,6 +46,8 @@ Number of words loaded to IRAM: 00004D92
 Loaded firmware, jumping to IRAM.
 ```
 
+All of the loader's output will be in red, to make it easier to distinguish it from other output.
+
 If you start loading the wrong thing and get error messages, hold button 0 (in the corner on the same side as the reset button) as long as the UART RX LED remains lit.
 This will cause the loader to ignore everything until you release the button.
 You can then try loading again.
