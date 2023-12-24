@@ -15,7 +15,7 @@ Building
 This is built with a simple Makefile that expects to be passed the locations of various tools and the RTOS directory as part of the make invocation:
 
 ```
-$ make make CHERIOT_LLVM_ROOT=path/to/llvm/bin/ CHERIOT_RTOS_SDK=/path/to/cheriot-rtos/sdk/
+$ make CHERIOT_LLVM_ROOT=path/to/llvm/bin/ CHERIOT_RTOS_SDK=/path/to/cheriot-rtos/sdk/
 ```
 
 This command will produce the `cpu0_irom.vhx` file.
